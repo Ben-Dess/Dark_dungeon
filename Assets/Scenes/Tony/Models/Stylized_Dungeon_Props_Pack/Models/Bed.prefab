@@ -12,6 +12,8 @@ GameObject:
   - component: {fileID: 3798619564167832158}
   - component: {fileID: 1392631635031250580}
   - component: {fileID: 4492377390629824209}
+  - component: {fileID: 5865036512791996459}
+  - component: {fileID: 2007804540771735848}
   m_Layer: 0
   m_Name: Bed_Frame (1)
   m_TagString: Untagged
@@ -109,8 +111,50 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1.241359, y: 1.0730202, z: 2.37991}
-  m_Center: {x: -0.010153204, y: 0.5376897, z: -0.007009685}
+  m_Size: {x: 1.241359, y: 1.0730202, z: 0.12036824}
+  m_Center: {x: -0.010153174, y: 0.5376897, z: 1.1227611}
+--- !u!65 &5865036512791996459
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 599932472686147393}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.307972, y: 0.21697628, z: 2.3371537}
+  m_Center: {x: 0.0007402897, y: 0.4357866, z: -0.030311942}
+--- !u!65 &2007804540771735848
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 599932472686147393}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.307972, y: 1.0717598, z: 0.117541075}
+  m_Center: {x: 0.0007402897, y: 0.54352015, z: -1.1380149}
 --- !u!1 &1349797021439840284
 GameObject:
   m_ObjectHideFlags: 0
@@ -379,7 +423,7 @@ GameObject:
   - component: {fileID: 6566310685721826857}
   - component: {fileID: 7822721019717753228}
   - component: {fileID: 5434459485027626310}
-  - component: {fileID: 8641134271211837944}
+  - component: {fileID: 9115829272624257785}
   m_Layer: 0
   m_Name: Sheet (1)
   m_TagString: Untagged
@@ -458,8 +502,8 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &8641134271211837944
-BoxCollider:
+--- !u!64 &9115829272624257785
+MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -476,6 +520,7 @@ BoxCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1.307972, y: 0.4357006, z: 1.8506148}
-  m_Center: {x: 0.0007402897, y: -0.045230955, z: 0.037606925}
+  serializedVersion: 5
+  m_Convex: 1
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -2143783900196136720, guid: ad9adb361ed572e4abac7bef7239259d, type: 3}

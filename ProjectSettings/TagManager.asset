@@ -4,7 +4,15 @@
 TagManager:
   serializedVersion: 3
   tags:
-  - Anchor
+  - DoorsCells
+  - Key
+  - Plank
+  - DoorEnd
+  - Lock
+  - Slot1B
+  - Slot2B
+  - Slot3B
+  - FinishScene
   layers:
   - Default
   - TransparentFX
