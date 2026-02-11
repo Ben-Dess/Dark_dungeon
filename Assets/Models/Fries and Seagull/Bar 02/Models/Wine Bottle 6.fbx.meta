@@ -1,9 +1,41 @@
 fileFormatVersion: 2
 guid: 1bb658b1ec45e4a4bb3c55566c4af39e
+AssetOrigin:
+  serializedVersion: 1
+  productId: 306976
+  packageName: Bar / Interior - Functional Low Poly assets
+  packageVersion: 1.0
+  assetPath: Assets/Fries and Seagull/Bar 02/Models/Wine Bottle 6.fbx
+  uploadId: 721453
 ModelImporter:
-  serializedVersion: 22200
+  serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.138
+    second: {fileID: 2100000, guid: 49949fcc71fcf8c44bc03cb745383f95, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.164
+    second: {fileID: 2100000, guid: f4d0696b320bcb04a90646ad64783d12, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.174
+    second: {fileID: 2100000, guid: 761e8cdc7dbd85b42aa6bc4bce59c861, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.175
+    second: {fileID: 2100000, guid: 0f598cd0472c09f40be59b792eb9beaf, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.176
+    second: {fileID: 2100000, guid: 9f3cf09af15cb97429506aa29fd16d6b, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -16,8 +48,6 @@ ModelImporter:
     optimizeGameObjects: 0
     removeConstantScaleCurves: 0
     motionNodeName: 
-    rigImportErrors: 
-    rigImportWarnings: 
     animationImportErrors: 
     animationImportWarnings: 
     animationRetargetingWarnings: 
@@ -58,6 +88,9 @@ ModelImporter:
     maxBonesPerVertex: 4
     minBoneWeight: 0.001
     optimizeBones: 1
+    generateMeshLods: 0
+    meshLodGenerationFlags: 0
+    maximumMeshLod: -1
     meshOptimizationFlags: -1
     indexFormat: 0
     secondaryUVAngleDistortion: 8
@@ -107,10 +140,3 @@ ModelImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 306976
-  packageName: Bar / Interior - Functional Low Poly assets
-  packageVersion: 1.0
-  assetPath: Assets/Fries and Seagull/Bar 02/Models/Wine Bottle 6.fbx
-  uploadId: 721453
