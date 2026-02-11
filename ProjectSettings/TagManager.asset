@@ -4,7 +4,27 @@
 TagManager:
   serializedVersion: 3
   tags:
-  - Anchor
+  - DoorsCells
+  - Key
+  - Plank
+  - DoorEnd
+  - Lock
+  - Slot1B
+  - Slot2B
+  - Slot3B
+  - FinishScene
+  - Rune1B
+  - Rune2B
+  - Rune3B
+  - Rune4B
+  - Rune5B
+  - Rune6B
+  - Rune7B
+  - Rune8B
+  - Rune9B
+  - Rune10B
+  - Rune11B
+  - Rune12B
   layers:
   - Default
   - TransparentFX
