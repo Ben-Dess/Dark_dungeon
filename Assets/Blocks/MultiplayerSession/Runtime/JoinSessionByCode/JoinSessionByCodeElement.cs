@@ -59,7 +59,10 @@ namespace Blocks.Sessions
             sessionCodeTextField.SetBinding("value", sessionCodeBinding);
             Add(sessionCodeTextField);
             m_Bindings.Add(sessionCodeBinding);
-
+            sessionCodeTextField.RegisterCallback<FocusInEvent>(evt =>
+            {
+                VRKeyboard.Instance?.Show(sessionCodeTextField);
+            });
             var createSessionButton = new Button
             {
                 text = k_JoinButtonText

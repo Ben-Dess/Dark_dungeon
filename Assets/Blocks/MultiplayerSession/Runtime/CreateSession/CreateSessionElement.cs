@@ -63,6 +63,11 @@ namespace Blocks.Sessions
             sessionNameTextField.SetBinding("value", sessionNameBinding);
             Add(sessionNameTextField);
             m_Bindings.Add(sessionNameBinding);
+            sessionNameTextField.RegisterCallback<FocusInEvent>(_ =>
+            {
+                VRKeyboard.Instance?.Show(sessionNameTextField);
+            });
+
 
             var createSessionButton = new Button
             {
