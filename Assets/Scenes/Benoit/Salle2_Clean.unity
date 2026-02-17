@@ -759,6 +759,73 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0d780173c250d334f80c9061373c8e4f, type: 3}
+--- !u!1 &85273594
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 85273595}
+  - component: {fileID: 85273597}
+  - component: {fileID: 85273596}
+  m_Layer: 0
+  m_Name: UnlockZone
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &85273595
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 85273594}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1568419300}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &85273596
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 85273594}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9df2cd317879b0a4fb397569043a1c13, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FireBarrierUnlockZone
+  suction: {fileID: 0}
+--- !u!65 &85273597
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 85273594}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 3.9141335, y: 1, z: 2.3361979}
+  m_Center: {x: 1.4570668, y: 0, z: 0.6680989}
 --- !u!4 &87447417 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 400000, guid: fe2e85b4d6271d84797599c39656320c, type: 3}
@@ -10910,7 +10977,7 @@ Transform:
   m_GameObject: {fileID: 861281861}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.334, y: 1.672, z: 0.0276}
+  m_LocalPosition: {x: 0.328, y: 1.676, z: 0.0276}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -18871,6 +18938,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1568419300}
   - component: {fileID: 1568419299}
+  - component: {fileID: 1568419302}
+  - component: {fileID: 1568419301}
   m_Layer: 0
   m_Name: FireBarriere
   m_TagString: Untagged
@@ -18914,8 +18983,48 @@ Transform:
   m_Children:
   - {fileID: 210290967}
   - {fileID: 1032152154}
+  - {fileID: 85273595}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1568419301
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1568419298}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a3e2bbb82d53dc7438c8f36e719aa277, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FireParticleSuction
+  barrier: {fileID: 1568419302}
+  fireSystems: []
+  suctionTarget: {fileID: 0}
+  suctionForce: 6
+  suctionForceRamp: 10
+  swirl: 2
+  killDistance: 0.12
+  duration: 1.2
+  oneShot: 1
+--- !u!114 &1568419302
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1568419298}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84525864a73f23846b4d42a1f02f1b73, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FireBarrier
+  blockingCollider: {fileID: 1568419299}
+  particleSystems: []
+  lerpSpeed: 8
+  closedEmissionMult: 1
+  openEmissionMult: 0
+  openedOnce: 0
 --- !u!1001 &1570581291
 PrefabInstance:
   m_ObjectHideFlags: 0
