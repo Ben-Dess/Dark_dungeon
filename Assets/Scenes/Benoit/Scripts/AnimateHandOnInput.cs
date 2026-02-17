@@ -1,8 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
-public class AnimateHandOnInput : MonoBehaviour
+public class AnimateHandOnInput : NetworkBehaviour
 {
     public InputActionProperty pinchAnimationAction;
     public InputActionProperty gripAnimationAction;
@@ -10,15 +12,18 @@ public class AnimateHandOnInput : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        float triggerValue = pinchAnimationAction.action.ReadValue<float>();
-        float gripValue = gripAnimationAction.action.ReadValue <float>();
-        handAnimator.SetFloat("Trigger", triggerValue);
-        handAnimator.SetFloat("Grip", gripValue);
+        if (IsOwner)
+        {
+            float triggerValue = pinchAnimationAction.action.ReadValue<float>();
+            float gripValue = gripAnimationAction.action.ReadValue<float>();
+            handAnimator.SetFloat("Trigger", triggerValue);
+            handAnimator.SetFloat("Grip", gripValue);
+        }
     }
 }
