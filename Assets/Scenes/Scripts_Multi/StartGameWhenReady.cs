@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 public class StartGameWhenReady : MonoBehaviour
 {
     public int expectedPlayers = 2;
-    public string gameSceneName = "Salle2_Clean";
+    public string gameSceneName = "Salle_Cellules";
     bool launched;
 
     void Update()
