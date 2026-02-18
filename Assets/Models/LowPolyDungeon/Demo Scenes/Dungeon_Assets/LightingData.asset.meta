@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: f6dcc457bb820f64780f5a61703a7512
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 112000000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 143535
+  packageName: Ultimate Low Poly Dungeon
+  packageVersion: 2.0
+  assetPath: Assets/BrokenVector/LowPolyDungeon/Demo Scenes/Dungeon_Assets/LightingData.asset
+  uploadId: 481753

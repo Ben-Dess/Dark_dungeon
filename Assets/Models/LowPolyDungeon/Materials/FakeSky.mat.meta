@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ece90595fa5ff9b46a126853fc62f3de
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 143535
+  packageName: Ultimate Low Poly Dungeon
+  packageVersion: 2.0
+  assetPath: Assets/BrokenVector/LowPolyDungeon/Materials/FakeSky.mat
+  uploadId: 481753
