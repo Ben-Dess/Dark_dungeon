@@ -1,18 +1,18 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.XR.Interaction.Toolkit;
+
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 
 public class ResetManager : MonoBehaviour
 {
     [Header("What to reset")]
-    [Tooltip("Glisse ici toutes les bouteilles (instances dans la scène).")]
+    [Tooltip("Glisse ici toutes les bouteilles (instances dans la scï¿½ne).")]
     public List<Transform> bottles = new();
 
-    [Tooltip("Optionnel : référence au chaudron pour le reset.")]
+    [Tooltip("Optionnel : rï¿½fï¿½rence au chaudron pour le reset.")]
     public CauldronMixer cauldron;
 
-    // État initial
+    // ï¿½tat initial
     private class BottleState
     {
         public Transform t;
@@ -68,14 +68,14 @@ public class ResetManager : MonoBehaviour
             if (st.t == null) continue;
 
             // A) Forcer le "drop" si l'objet est grab
-            // (méthode compatible: désactiver/réactiver l'interactable)
+            // (mï¿½thode compatible: dï¿½sactiver/rï¿½activer l'interactable)
             if (st.grab != null && st.grab.isSelected)
             {
                 st.grab.enabled = false;
                 st.grab.enabled = true;
             }
 
-            // B) Désactiver colliders 1 frame (évite explosions de physique)
+            // B) Dï¿½sactiver colliders 1 frame (ï¿½vite explosions de physique)
             if (st.colliders != null)
             {
                 foreach (var c in st.colliders)
@@ -90,7 +90,7 @@ public class ResetManager : MonoBehaviour
             // D) Reset Rigidbody
             if (st.rb != null)
             {
-                st.rb.velocity = Vector3.zero;
+                st.rb.linearVelocity = Vector3.zero;
                 st.rb.angularVelocity = Vector3.zero;
 
                 // Certaines versions Unity recommandent linearVelocity, mais velocity marche encore.
@@ -99,7 +99,7 @@ public class ResetManager : MonoBehaviour
                 st.rb.WakeUp();
             }
 
-            // E) Réactiver colliders
+            // E) Rï¿½activer colliders
             if (st.colliders != null)
             {
                 foreach (var c in st.colliders)

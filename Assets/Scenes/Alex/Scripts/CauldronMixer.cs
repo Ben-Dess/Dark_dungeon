@@ -17,23 +17,23 @@ public class CauldronMixer : MonoBehaviour
     public XRSocketInteractor potionSocket;
 
     [Header("Drink Interaction (VR)")]
-    [Tooltip("Ajoute XR Simple Interactable sur le chaudron (ou un enfant) et référence-le ici.")]
+    [Tooltip("Ajoute XR Simple Interactable sur le chaudron (ou un enfant) et rï¿½fï¿½rence-le ici.")]
     public XRSimpleInteractable drinkInteractable;
 
-    [Tooltip("Message world-space affiché après avoir bu (TMP_Text).")]
+    [Tooltip("Message world-space affichï¿½ aprï¿½s avoir bu (TMP_Text).")]
     public TMP_Text drinkMessageText;
 
-    [Tooltip("Durée d'affichage du message.")]
+    [Tooltip("Durï¿½e d'affichage du message.")]
     public float drinkMessageDuration = 2.5f;
 
     [Header("Liquid Visual (optional)")]
     public Renderer liquidRenderer;
     public string colorProperty = "_BaseColor"; // URP: _BaseColor | Built-in: _Color
 
-    [Tooltip("Couleur du chaudron pendant le mélange (départ).")]
+    [Tooltip("Couleur du chaudron pendant le mï¿½lange (dï¿½part).")]
     public Color baseLiquidColor = Color.black;
 
-    [Tooltip("Couleur OR quand la recette est réussie.")]
+    [Tooltip("Couleur OR quand la recette est rï¿½ussie.")]
     public Color goldColor = new Color(1f, 0.84f, 0.0f);
 
     [Header("Rules")]
@@ -46,10 +46,10 @@ public class CauldronMixer : MonoBehaviour
     public float addCooldown = 0.2f;
 
     [Header("Door Unlock")]
-    [Tooltip("Porte à faire disparaître quand la recette est terminée (mets le parent qui contient mesh + colliders).")]
+    [Tooltip("Porte ï¿½ faire disparaï¿½tre quand la recette est terminï¿½e (mets le parent qui contient mesh + colliders).")]
     public GameObject doorToDisable;
 
-    [Tooltip("Si true -> la porte disparaît (SetActive(false)). Si false -> on désactive seulement les colliders.")]
+    [Tooltip("Si true -> la porte disparaï¿½t (SetActive(false)). Si false -> on dï¿½sactive seulement les colliders.")]
     public bool disableWholeDoorObject = true;
 
     public bool RecipeSolved { get; private set; } = false;
@@ -61,7 +61,7 @@ public class CauldronMixer : MonoBehaviour
     readonly HashSet<int> _consumedInstanceIds = new HashSet<int>();
     float _nextAllowedAddTime = 0f;
 
-    // Qui a déjà bu ? (utile si tu veux 1x par joueur)
+    // Qui a dï¿½jï¿½ bu ? (utile si tu veux 1x par joueur)
     readonly HashSet<int> _drinkers = new HashSet<int>();
 
     void Awake()
@@ -131,8 +131,8 @@ public class CauldronMixer : MonoBehaviour
         if (!shelfOk || !colorOk)
         {
             Debug.LogWarning(
-                $"Mauvaise potion à l'étape {_step + 1}. " +
-                $"Attendu: {expected.shelfID}-{expected.colorName} | Reçu: {bottle.shelfID}-{bottle.colorName}\n" +
+                $"Mauvaise potion ï¿½ l'ï¿½tape {_step + 1}. " +
+                $"Attendu: {expected.shelfID}-{expected.colorName} | Reï¿½u: {bottle.shelfID}-{bottle.colorName}\n" +
                 $"-> Reset total, recommencer la recette."
             );
 
@@ -149,7 +149,7 @@ public class CauldronMixer : MonoBehaviour
 
         _step++;
 
-        // Mélange de couleur progressif tant que pas fini
+        // Mï¿½lange de couleur progressif tant que pas fini
         _currentColor = Color.Lerp(_currentColor, bottle.liquidColor, 1f / Mathf.Max(1, _step));
         ApplyLiquidColor(_currentColor);
 
@@ -165,13 +165,13 @@ public class CauldronMixer : MonoBehaviour
         if (_step >= requiredCount)
         {
             RecipeSolved = true;
-            Debug.Log("Recette terminée ! Le chaudron est prêt.");
+            Debug.Log("Recette terminï¿½e ! Le chaudron est prï¿½t.");
 
             // Couleur OR finale
             _currentColor = goldColor;
             ApplyLiquidColor(_currentColor);
 
-            // --- NOUVEAU : Désactiver la porte pour libérer le joueur ---
+            // --- NOUVEAU : Dï¿½sactiver la porte pour libï¿½rer le joueur ---
             DisableDoorIfAssigned();
         }
     }
@@ -186,12 +186,12 @@ public class CauldronMixer : MonoBehaviour
         }
         else
         {
-            // Désactive uniquement les colliders (la porte reste visible)
+            // Dï¿½sactive uniquement les colliders (la porte reste visible)
             foreach (var c in doorToDisable.GetComponentsInChildren<Collider>(true))
                 c.enabled = false;
         }
 
-        Debug.Log("[Cauldron] Porte désactivée (sortie ouverte).");
+        Debug.Log("[Cauldron] Porte dï¿½sactivï¿½e (sortie ouverte).");
     }
 
     void ConsumeBottleNonDestructive(PotionBottle bottle)
@@ -202,7 +202,7 @@ public class CauldronMixer : MonoBehaviour
             bool wasKinematic = rb.isKinematic;
             if (wasKinematic) rb.isKinematic = false;
 
-            rb.velocity = Vector3.zero;
+            rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
 
             rb.isKinematic = true;
