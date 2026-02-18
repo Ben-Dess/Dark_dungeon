@@ -1,0 +1,52 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement name="keyboardRoot" style="flex-grow: 1; width: 900px; height: 500px; background-color: rgb(36, 36, 36); padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; border-top-left-radius: 20px; border-top-right-radius: 20px; border-bottom-right-radius: 20px; border-bottom-left-radius: 20px;">
+        <ui:VisualElement name="keysContainer" style="flex-grow: 1; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px;">
+            <ui:VisualElement name="row1" style="flex-grow: 1; flex-direction: row; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px;">
+                <ui:Button text="1" style="height: 80px; width: 80px; font-size: 32px;" />
+                <ui:Button text="2" style="height: 80px; width: 80px; font-size: 32px;" />
+                <ui:Button text="3" style="height: 80px; width: 80px; font-size: 32px;" />
+                <ui:Button text="4" style="height: 80px; width: 80px; font-size: 32px;" />
+                <ui:Button text="5" style="height: 80px; width: 80px; font-size: 32px;" />
+                <ui:Button text="6" style="height: 80px; width: 80px; font-size: 32px;" />
+                <ui:Button text="7" style="height: 80px; width: 80px; font-size: 32px;" />
+                <ui:Button text="8" style="height: 80px; width: 80px; font-size: 32px;" />
+                <ui:Button text="9" style="height: 80px; width: 80px; font-size: 32px;" />
+                <ui:Button text="0" style="height: 80px; width: 80px; font-size: 32px;" />
+            </ui:VisualElement>
+            <ui:VisualElement name="row2" style="flex-grow: 1; flex-direction: row; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px;">
+                <ui:Button text="A" style="height: 80px; width: 80px; font-size: 32px;" />
+                <ui:Button text="Z" style="height: 80px; width: 80px; font-size: 32px;" />
+                <ui:Button text="E" style="height: 80px; width: 80px; font-size: 32px;" />
+                <ui:Button text="R" style="height: 80px; width: 80px; font-size: 32px;" />
+                <ui:Button text="T" style="height: 80px; width: 80px; font-size: 32px;" />
+                <ui:Button text="Y" style="height: 80px; width: 80px; font-size: 32px;" />
+                <ui:Button text="U" style="height: 80px; width: 80px; font-size: 32px;" />
+                <ui:Button text="I" style="height: 80px; width: 80px; font-size: 32px;" />
+                <ui:Button text="O" style="height: 80px; width: 80px; font-size: 32px;" />
+                <ui:Button text="P" style="height: 80px; width: 80px; font-size: 32px;" />
+            </ui:VisualElement>
+            <ui:VisualElement name="row3" style="flex-grow: 1; flex-direction: row; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px;">
+                <ui:Button text="Q" style="height: 80px; width: 80px; font-size: 32px;" />
+                <ui:Button text="S" style="height: 80px; width: 80px; font-size: 32px;" />
+                <ui:Button text="D" style="height: 80px; width: 80px; font-size: 32px;" />
+                <ui:Button text="F" style="height: 80px; width: 80px; font-size: 32px;" />
+                <ui:Button text="G" style="height: 80px; width: 80px; font-size: 32px;" />
+                <ui:Button text="H" style="height: 80px; width: 80px; font-size: 32px;" />
+                <ui:Button text="J" style="height: 80px; width: 80px; font-size: 32px;" />
+                <ui:Button text="K" style="height: 80px; width: 80px; font-size: 32px;" />
+                <ui:Button text="L" style="height: 80px; width: 80px; font-size: 32px;" />
+                <ui:Button text="M" style="height: 80px; width: 80px; font-size: 32px;" />
+            </ui:VisualElement>
+            <ui:VisualElement name="row4" style="flex-grow: 1; flex-direction: row; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px;">
+                <ui:Button text="W" style="height: 80px; width: 80px; font-size: 32px;" />
+                <ui:Button text="X" style="height: 80px; width: 80px; font-size: 32px;" />
+                <ui:Button text="C" style="height: 80px; width: 80px; font-size: 32px;" />
+                <ui:Button text="V" style="height: 80px; width: 80px; font-size: 32px;" />
+                <ui:Button text="B" style="height: 80px; width: 80px; font-size: 32px;" />
+                <ui:Button text="N" style="height: 80px; width: 80px; font-size: 32px;" />
+                <ui:Button text="EFFACER" name="key_back" style="height: 80px; width: 168px; font-size: 32px;" />
+                <ui:Button text="OK" name="key_ok" style="height: 80px; width: 168px; font-size: 32px;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
