@@ -25,6 +25,10 @@ public class AN_DoorScript : MonoBehaviour
     [Tooltip("Speed for door opening, degrees per sec")]
     public float OpenSpeed = 3f;
 
+    [Header("SFX (optional)")]
+    public AudioClip doorOpenSfx;
+    [Range(0f, 1f)] public float doorOpenVolume = 1f;
+
     // NearView()
     float distance;
     float angleView;
@@ -42,54 +46,19 @@ public class AN_DoorScript : MonoBehaviour
         rbDoor = GetComponent<Rigidbody>();
         hinge = GetComponent<HingeJoint>();
         HeroInteractive = FindObjectOfType<AN_HeroInteractive>();
+
+        if (hinge != null)
+        {
+            hingeLim = hinge.limits;
+            currentLim = hingeLim.max;
+        }
     }
 
     void Update()
     {
-        // VR / New Input System:
-        // On ne lit PAS UnityEngine.Input ici.
-        // L'ouverture/fermeture se fait via appel externe (XR Interactable) :
-        // - Action() (toggle) si tu veux garder la logique clé
-        // - SetOpen(true/false) si tu veux un "hold to open"
+        // kept for compatibility - no "E" interaction here in your VR setup
     }
 
-    /// <summary>
-    /// Toggle open/close (garde la logique des clés comme dans l'asset).
-    /// </summary>
-    public void Action() // void to open/close door
-    {
-        if (!Locked)
-        {
-            // key lock checking
-            if (HeroInteractive != null && RedLocked && HeroInteractive.RedKey)
-            {
-                RedLocked = false;
-                HeroInteractive.RedKey = false;
-            }
-            else if (HeroInteractive != null && BlueLocked && HeroInteractive.BlueKey)
-            {
-                BlueLocked = false;
-                HeroInteractive.BlueKey = false;
-            }
-
-            // opening/closing
-            if (isOpened && CanClose && !RedLocked && !BlueLocked)
-            {
-                isOpened = false;
-            }
-            else if (!isOpened && CanOpen && !RedLocked && !BlueLocked)
-            {
-                isOpened = true;
-                if (rbDoor != null)
-                    rbDoor.AddRelativeTorque(new Vector3(0, 0, 20f));
-            }
-        }
-    }
-
-    /// <summary>
-    /// VR-friendly: impose l'état ouvert/fermé (sans utiliser clavier/souris).
-    /// Ne consomme PAS les clés (si la porte est verrouillée par clé, elle reste verrouillée).
-    /// </summary>
     public void SetOpen(bool open)
     {
         if (Locked) return;
@@ -98,6 +67,10 @@ public class AN_DoorScript : MonoBehaviour
         {
             if (!CanOpen) return;
             if (RedLocked || BlueLocked) return;
+
+            // SFX only when state changes to open
+            if (!isOpened && doorOpenSfx != null)
+                SFXManager.Instance?.Play3D(doorOpenSfx, transform.position, doorOpenVolume);
 
             isOpened = true;
             if (rbDoor != null)
@@ -116,28 +89,19 @@ public class AN_DoorScript : MonoBehaviour
     {
         if (Camera.main == null) return false;
         distance = Vector3.Distance(transform.position, Camera.main.transform.position);
+
         direction = transform.position - Camera.main.transform.position;
-        angleView = Vector3.Angle(Camera.main.transform.forward, direction);
-        if (distance < 3f) return true; // angleView < 35f &&
-        else return false;
+        angleView = Vector3.Angle(direction, Camera.main.transform.forward);
+        return (distance < 3f && angleView < 70f);
     }
 
-    private void FixedUpdate() // door is physical object
+    public void Open()
     {
-        if (isOpened)
-        {
-            currentLim = 85f;
-        }
-        else
-        {
-            // currentLim = hinge.angle; // door will closed from current opened angle
-            if (currentLim > 1f)
-                currentLim -= .5f * OpenSpeed;
-        }
+        SetOpen(true);
+    }
 
-        // using values to door object
-        hingeLim.max = currentLim;
-        hingeLim.min = -currentLim;
-        hinge.limits = hingeLim;
+    public void Close()
+    {
+        SetOpen(false);
     }
 }

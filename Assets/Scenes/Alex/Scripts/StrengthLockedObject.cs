@@ -14,6 +14,11 @@ public class StrengthLockedObject : MonoBehaviour
     public Transform moveTarget;          // optionnel si disappear=false
     public float moveDuration = 1.0f;
 
+    [Header("SFX (optional)")]
+    public AudioClip sfxBreak;
+    [Range(0f, 1f)] public float sfxVolume = 1f;
+    public bool play3D = true;
+
     [Header("Feedback (optional)")]
     public TMP_Text messageText;
     public float msgDuration = 2f;
@@ -48,21 +53,22 @@ public class StrengthLockedObject : MonoBehaviour
 
         if (!PlayerStrengthState.IsStronger(interactorId))
         {
-            Show("It’s too heavy... You don’t have enough strength");
+            Show("It's too heavy ... You need more strength");
             return;
         }
 
-        // Action
         if (disappear)
         {
-            Show("Wow, you broke the barrel !");
+            Show("Wow ! You broke the barrel !");
+            PlayBreakSfx();
             gameObject.SetActive(false);
         }
         else
         {
             if (moveTarget != null)
             {
-                Show("Wow, you broke the barrel !");
+                Show("Wow ! You broke the barrel !");
+                PlayBreakSfx();
                 StopAllCoroutines();
                 StartCoroutine(MoveTo(moveTarget.position, moveTarget.rotation));
             }
@@ -82,6 +88,16 @@ public class StrengthLockedObject : MonoBehaviour
             transform.rotation = Quaternion.Slerp(r0, rot, t);
             yield return null;
         }
+    }
+
+    void PlayBreakSfx()
+    {
+        if (sfxBreak == null) return;
+
+        if (play3D)
+            SFXManager.Instance?.Play3D(sfxBreak, transform.position, sfxVolume);
+        else
+            SFXManager.Instance?.Play2D(sfxBreak, sfxVolume);
     }
 
     void Show(string msg)
