@@ -1,18 +1,18 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.XR.Interaction.Toolkit;
+
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 
 public class ResetManager : MonoBehaviour
 {
     [Header("What to reset")]
-    [Tooltip("Glisse ici toutes les bouteilles (instances dans la scène).")]
+    [Tooltip("Glisse ici toutes les bouteilles (instances dans la scï¿½ne).")]
     public List<Transform> bottles = new();
 
-    [Tooltip("Optionnel : référence au chaudron pour le reset.")]
+    [Tooltip("Optionnel : rï¿½fï¿½rence au chaudron pour le reset.")]
     public CauldronMixer cauldron;
 
-    // état initial
+
     private class BottleState
     {
         public Transform t;
@@ -56,7 +56,7 @@ public class ResetManager : MonoBehaviour
                 renderers = t.GetComponentsInChildren<Renderer>(true)
             };
 
-            // On réactive au reset certains scripts typiques (hover label etc.)
+            // On rï¿½active au reset certains scripts typiques (hover label etc.)
             // Si tu veux en ajouter, mets-les ici.
             var listBehaviours = new List<Behaviour>();
             var hover = t.GetComponent<PotionHoverName>();
@@ -81,28 +81,28 @@ public class ResetManager : MonoBehaviour
         {
             if (st.t == null) continue;
 
-            // A) Forcer le "drop" si l'objet est grab (méthode compatible)
+
             if (st.grab != null && st.grab.isSelected)
             {
                 st.grab.enabled = false;
                 st.grab.enabled = true;
             }
 
-            // B) Désactiver colliders 1 instant (évite explosions physiques pendant teleport)
+
             if (st.colliders != null)
             {
                 foreach (var c in st.colliders)
                     if (c != null) c.enabled = false;
             }
 
-            // C) Réactiver les renderers (IMPORTANT : sinon bouteille invisible)
+            // C) Rï¿½activer les renderers (IMPORTANT : sinon bouteille invisible)
             if (st.renderers != null)
             {
                 foreach (var r in st.renderers)
                     if (r != null) r.enabled = true;
             }
 
-            // D) Réactiver Grab + scripts (IMPORTANT : sinon non-grabbable / pas de hover)
+            // D) Rï¿½activer Grab + scripts (IMPORTANT : sinon non-grabbable / pas de hover)
             if (st.grab != null) st.grab.enabled = true;
 
             if (st.behavioursToReenable != null)
@@ -119,17 +119,19 @@ public class ResetManager : MonoBehaviour
             // F) Remettre Rigidbody normal
             if (st.rb != null)
             {
+
                 st.rb.isKinematic = false;
                 st.rb.useGravity = true;
 
                 st.rb.velocity = Vector3.zero;
+
                 st.rb.angularVelocity = Vector3.zero;
 
                 st.rb.Sleep();
                 st.rb.WakeUp();
             }
 
-            // G) Réactiver colliders (IMPORTANT)
+
             if (st.colliders != null)
             {
                 foreach (var c in st.colliders)
