@@ -1949,6 +1949,7 @@ GameObject:
   - component: {fileID: 5775039003052335421}
   - component: {fileID: 1943838752761699698}
   - component: {fileID: 7076139633466995858}
+  - component: {fileID: 298186077472970242}
   m_Layer: 0
   m_Name: NetworkXRPlayer
   m_TagString: Untagged
@@ -2081,6 +2082,21 @@ MonoBehaviour:
   - {fileID: 4291060647960311835}
   - {fileID: 2676036825886105926}
   - {fileID: 5924034969036372430}
+  SpawnIndex:
+    m_InternalValue: -1
+--- !u!114 &298186077472970242
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6266030751222141706}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 152ba47a34f683b41bc025979e63fdb7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SceneChangeRequest
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!1 &6274344463885147424
 GameObject:
   m_ObjectHideFlags: 0

@@ -2,28 +2,31 @@ using UnityEngine;
 
 public class Scepter : MonoBehaviour
 {
+    [Header("Gem Visuals")]
+    [SerializeField] private GameObject redGemVisual;
     public Transform tip;
-    public Transform gemAttachPoint;
     public Gem equippedGem;
 
-    public void Equip(Gem gem)
+    public bool HasGem => equippedGem != null;
+
+    public void EquipGem(Gem gem)
     {
-        // On garde juste la référence, le Socket gère le parenting
-        if (equippedGem != null && equippedGem != gem)
-        {
-            Debug.Log($"[Scepter] Switching from {equippedGem.name} to {gem.name}");
-        }
+        if (HasGem) return;
 
         equippedGem = gem;
-        Debug.Log($"[Scepter] Equipped {gem.name}");
+
+        ActivateGemVisual(gem.Type);
+        gem.GetComponent<Renderer>().enabled = false;
     }
 
-    public void Unequip(Gem gem)
+    private void ActivateGemVisual(GemType type)
     {
-        if (equippedGem == gem)
+        switch (type)
         {
-            equippedGem = null;
-            Debug.Log($"[Scepter] Unequipped {gem.name}");
+            case GemType.Red:
+                if (redGemVisual)
+                    redGemVisual.SetActive(true);
+                break;
         }
     }
 }

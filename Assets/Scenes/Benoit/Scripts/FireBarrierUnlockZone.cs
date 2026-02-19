@@ -1,4 +1,5 @@
 using UnityEngine;
+using static Gem;
 
 [RequireComponent(typeof(Collider))]
 public class FireBarrierUnlockZone : MonoBehaviour
@@ -17,7 +18,7 @@ public class FireBarrierUnlockZone : MonoBehaviour
         if (scepter == null) return;
 
         // Si tu veux verrouiller sur gem rouge
-        if (scepter.equippedGem == null || scepter.equippedGem.type != GemType.Red) return;
+        if (scepter.equippedGem == null || scepter.equippedGem.Type != GemType.Red) return;
         if (scepter.tip == null) return;
 
         suction.StartSuction(scepter.tip);
