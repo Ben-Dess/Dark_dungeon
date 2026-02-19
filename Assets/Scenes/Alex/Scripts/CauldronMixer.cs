@@ -36,6 +36,15 @@ public class CauldronMixer : MonoBehaviour
     [Tooltip("Couleur OR quand la recette est r�ussie.")]
     public Color goldColor = new Color(1f, 0.84f, 0.0f);
 
+    [Header("SFX")]
+    public AudioClip sfxGoodBottle;
+    public AudioClip sfxWrongBottle;
+    public AudioClip sfxRecipeSolved;
+    public AudioClip sfxDrink;
+    public AudioClip sfxDoorOpen;
+    [Range(0f, 1f)] public float sfx2DVolume = 1f;
+    [Range(0f, 1f)] public float sfx3DVolume = 1f;
+
     [Header("Rules")]
     public int requiredCount = 3;
 
@@ -46,10 +55,9 @@ public class CauldronMixer : MonoBehaviour
     public float addCooldown = 0.2f;
 
     [Header("Door Unlock")]
-    [Tooltip("Porte � faire dispara�tre quand la recette est termin�e (mets le parent qui contient mesh + colliders).")]
+
     public GameObject doorToDisable;
 
-    [Tooltip("Si true -> la porte dispara�t (SetActive(false)). Si false -> on d�sactive seulement les colliders.")]
     public bool disableWholeDoorObject = true;
 
     public bool RecipeSolved { get; private set; } = false;
@@ -61,7 +69,7 @@ public class CauldronMixer : MonoBehaviour
     readonly HashSet<int> _consumedInstanceIds = new HashSet<int>();
     float _nextAllowedAddTime = 0f;
 
-    // Qui a d�j� bu ? (utile si tu veux 1x par joueur)
+
     readonly HashSet<int> _drinkers = new HashSet<int>();
 
     void Awake()
@@ -130,6 +138,8 @@ public class CauldronMixer : MonoBehaviour
 
         if (!shelfOk || !colorOk)
         {
+            SFXManager.Instance?.Play2D(sfxWrongBottle, sfx2DVolume);
+
             Debug.LogWarning(
                 $"Mauvaise potion � l'�tape {_step + 1}. " +
                 $"Attendu: {expected.shelfID}-{expected.colorName} | Re�u: {bottle.shelfID}-{bottle.colorName}\n" +
@@ -147,9 +157,11 @@ public class CauldronMixer : MonoBehaviour
             return;
         }
 
+        SFXManager.Instance?.Play2D(sfxGoodBottle, sfx2DVolume);
+
         _step++;
 
-        // M�lange de couleur progressif tant que pas fini
+
         _currentColor = Color.Lerp(_currentColor, bottle.liquidColor, 1f / Mathf.Max(1, _step));
         ApplyLiquidColor(_currentColor);
 
@@ -165,13 +177,15 @@ public class CauldronMixer : MonoBehaviour
         if (_step >= requiredCount)
         {
             RecipeSolved = true;
-            Debug.Log("Recette termin�e ! Le chaudron est pr�t.");
 
-            // Couleur OR finale
+            Debug.Log("Recette termin�e ! Le chaudron est pr�t.");
+            SFXManager.Instance?.Play2D(sfxRecipeSolved, sfx2DVolume);
+
+
             _currentColor = goldColor;
             ApplyLiquidColor(_currentColor);
 
-            // --- NOUVEAU : D�sactiver la porte pour lib�rer le joueur ---
+
             DisableDoorIfAssigned();
         }
     }
@@ -180,13 +194,16 @@ public class CauldronMixer : MonoBehaviour
     {
         if (doorToDisable == null) return;
 
+        if (sfxDoorOpen != null)
+            SFXManager.Instance?.Play3D(sfxDoorOpen, doorToDisable.transform.position, sfx3DVolume);
+
         if (disableWholeDoorObject)
         {
             doorToDisable.SetActive(false);
         }
         else
         {
-            // D�sactive uniquement les colliders (la porte reste visible)
+
             foreach (var c in doorToDisable.GetComponentsInChildren<Collider>(true))
                 c.enabled = false;
         }
@@ -224,8 +241,6 @@ public class CauldronMixer : MonoBehaviour
             hover.enabled = false;
     }
 
-    // --------- BOIRE ---------
-
     void OnDrinkSelected(SelectEnterEventArgs args)
     {
         if (!RecipeSolved)
@@ -246,6 +261,7 @@ public class CauldronMixer : MonoBehaviour
 
         PlayerStrengthState.MarkStronger(interactorId);
 
+        SFXManager.Instance?.Play2D(sfxDrink, sfx2DVolume);
         ShowDrinkMessage("You feel stronger!");
     }
 
@@ -264,8 +280,6 @@ public class CauldronMixer : MonoBehaviour
         yield return new WaitForSeconds(drinkMessageDuration);
         drinkMessageText.gameObject.SetActive(false);
     }
-
-    // --------- RESET ---------
 
     public void ResetCauldron()
     {
