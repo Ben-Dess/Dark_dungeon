@@ -12424,6 +12424,10 @@ PrefabInstance:
       propertyPath: m_Center.z
       value: -0.11887144
       objectReference: {fileID: 0}
+    - target: {fileID: 8102393122972649684, guid: 9a017cbe28742b748a766d4212090abc, type: 3}
+      propertyPath: sceneName
+      value: Taverne
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

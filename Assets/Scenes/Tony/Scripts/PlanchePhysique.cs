@@ -20,5 +20,6 @@ public class PlanchePhysique : MonoBehaviour
     {
         // On désactive le mode Kinematic pour que la planche tombe
         rb.isKinematic = false;
+        rb.useGravity = true;
     }
 }
