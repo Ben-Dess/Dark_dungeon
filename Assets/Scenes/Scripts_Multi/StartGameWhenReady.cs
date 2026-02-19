@@ -27,15 +27,5 @@ public class StartGameWhenReady : MonoBehaviour
         }
     }
 
-    void OnGUI()
-    {
-        var nm = NetworkManager.Singleton;
-        if (nm == null) return;
-
-        GUILayout.BeginArea(new Rect(10, 10, 700, 220));
-        GUILayout.Label($"Listening: {nm.IsListening}  Host:{nm.IsHost}  Server:{nm.IsServer}  Client:{nm.IsClient}");
-        if (nm.IsListening) GUILayout.Label($"Connected: {nm.ConnectedClientsList.Count}/{expectedPlayers}");
-        GUILayout.Label($"SceneManager null? {(nm.SceneManager == null)}");
-        GUILayout.EndArea();
-    }
+    
 }

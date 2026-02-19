@@ -1,107 +1,126 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using Unity.Netcode;
 
-public class AN_DoorScript : MonoBehaviour
+[RequireComponent(typeof(NetworkObject))]
+public class AN_DoorScript : NetworkBehaviour
 {
-    [Tooltip("If it is false door can't be used")]
-    public bool Locked = false;
-    [Tooltip("It is true for remote control only")]
-    public bool Remote = false;
-    [Space]
-    [Tooltip("Door can be opened")]
+    [Header("Door Rules")]
+    public bool Locked = false;          // hard lock (admin)
     public bool CanOpen = true;
-    [Tooltip("Door can be closed")]
     public bool CanClose = true;
-    [Space]
-    [Tooltip("Door locked by red key (use key script to declarate any object as key)")]
+
+    [Header("Keys (optional)")]
     public bool RedLocked = false;
     public bool BlueLocked = false;
-    [Tooltip("It is used for key script working")]
-    AN_HeroInteractive HeroInteractive;
-    [Space]
-    public bool isOpened = false;
-    [Range(0f, 4f)]
-    [Tooltip("Speed for door opening, degrees per sec")]
-    public float OpenSpeed = 3f;
+
+    [Header("State (Networked)")]
+    public NetworkVariable<bool> Unlocked = new(false);  // <- IMPORTANT: persist for everyone
+    public NetworkVariable<bool> IsOpen = new(false);
+
+    [Header("Door Physics")]
+    public Rigidbody rbDoor;
+    public float openTorque = 20f;
 
     [Header("SFX (optional)")]
     public AudioClip doorOpenSfx;
     [Range(0f, 1f)] public float doorOpenVolume = 1f;
 
-    // NearView()
-    float distance;
-    float angleView;
-    Vector3 direction;
+    private bool _lastOpenState;
 
-    // Hinge
-    [HideInInspector]
-    public Rigidbody rbDoor;
-    HingeJoint hinge;
-    JointLimits hingeLim;
-    float currentLim;
-
-    void Start()
+    void Awake()
     {
-        rbDoor = GetComponent<Rigidbody>();
-        hinge = GetComponent<HingeJoint>();
-        HeroInteractive = FindObjectOfType<AN_HeroInteractive>();
+        if (rbDoor == null) rbDoor = GetComponent<Rigidbody>();
+    }
 
-        if (hinge != null)
+    public override void OnNetworkSpawn()
+    {
+        _lastOpenState = IsOpen.Value;
+
+        IsOpen.OnValueChanged += OnOpenChanged;
+        Unlocked.OnValueChanged += (_, __) => { /* you can add UI feedback */ };
+
+        // Apply initial state to clients
+        ApplyOpenState(IsOpen.Value, playSfx: false);
+    }
+
+    void OnDestroy()
+    {
+        IsOpen.OnValueChanged -= OnOpenChanged;
+    }
+
+    private void OnOpenChanged(bool previous, bool current)
+    {
+        ApplyOpenState(current, playSfx: true);
+    }
+
+    private void ApplyOpenState(bool open, bool playSfx)
+    {
+        // SFX when opening
+        if (open && !_lastOpenState && playSfx && doorOpenSfx != null)
+            SFXManager.Instance?.Play3D(doorOpenSfx, transform.position, doorOpenVolume);
+
+        _lastOpenState = open;
+
+        if (open && rbDoor != null)
         {
-            hingeLim = hinge.limits;
-            currentLim = hingeLim.max;
+            rbDoor.AddRelativeTorque(new Vector3(0, 0, openTorque));
         }
+        // For closing: you didn't have physics torque close, so we just set state.
+        // If you want auto-close torque, tell me and I’ll add it.
     }
 
-    void Update()
+    // =========================
+    // Public API (call these)
+    // =========================
+
+    public bool CanInteract()
     {
-        // kept for compatibility - no "E" interaction here in your VR setup
+        if (Locked) return false;
+        if (!Unlocked.Value) return false;        // <- Gate here
+        if (RedLocked || BlueLocked) return false;
+        return true;
     }
 
-    public void SetOpen(bool open)
+    public void RequestOpen() => SetOpenServerRpc(true);
+    public void RequestClose() => SetOpenServerRpc(false);
+
+    public void RequestToggle()
+    {
+        SetOpenServerRpc(!IsOpen.Value);
+    }
+
+    public void RequestUnlock()
+    {
+        UnlockServerRpc();
+    }
+
+    // =========================
+    // Server authority
+    // =========================
+
+    [ServerRpc(RequireOwnership = false)]
+    private void UnlockServerRpc(ServerRpcParams rpcParams = default)
     {
         if (Locked) return;
+        if (RedLocked || BlueLocked) return;
+
+        Unlocked.Value = true;
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void SetOpenServerRpc(bool open, ServerRpcParams rpcParams = default)
+    {
+        if (!CanInteract()) return;
 
         if (open)
         {
             if (!CanOpen) return;
-            if (RedLocked || BlueLocked) return;
-
-            // SFX only when state changes to open
-            if (!isOpened && doorOpenSfx != null)
-                SFXManager.Instance?.Play3D(doorOpenSfx, transform.position, doorOpenVolume);
-
-            isOpened = true;
-            if (rbDoor != null)
-                rbDoor.AddRelativeTorque(new Vector3(0, 0, 20f));
+            IsOpen.Value = true;
         }
         else
         {
             if (!CanClose) return;
-            if (RedLocked || BlueLocked) return;
-
-            isOpened = false;
+            IsOpen.Value = false;
         }
-    }
-
-    bool NearView() // kept for compatibility (unused in VR version)
-    {
-        if (Camera.main == null) return false;
-        distance = Vector3.Distance(transform.position, Camera.main.transform.position);
-
-        direction = transform.position - Camera.main.transform.position;
-        angleView = Vector3.Angle(direction, Camera.main.transform.forward);
-        return (distance < 3f && angleView < 70f);
-    }
-
-    public void Open()
-    {
-        SetOpen(true);
-    }
-
-    public void Close()
-    {
-        SetOpen(false);
     }
 }

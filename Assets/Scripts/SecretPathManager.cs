@@ -1,10 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.XR.Interaction.Toolkit;
-using Unity.XR.CoreUtils;
 
-public class SecretPathManager : MonoBehaviour
+public class SecretPathManager : NetworkBehaviour
 {
     public static SecretPathManager Instance { get; private set; }
 
@@ -17,27 +16,58 @@ public class SecretPathManager : MonoBehaviour
     public float resetDelay = 1f;
     public bool resetOnWrong = true;
 
-    [Header("XR Teleport")]
-    public XROrigin xrOrigin;
-    public Transform startPoint;
-    public bool matchRotation = true;
-
     [Header("Fin de séquence")]
-    public GameObject doorToDestroy;     // glisse ta porte ici dans l’inspecteur
-    public float destroyDelay = 0f;      // 0 = immédiat
+    public GameObject doorToDestroy;
+    public float destroyDelay = 0f;
     public bool resetAfterSuccess = false;
 
-    private int _progressIndex = 0;
-    private bool _isResetting = false;
-    private bool _completed = false;
+    int _progressIndex = 0;
+    bool _isResetting = false;
+    bool _completed = false;
 
-    private void Awake()
+    // Cache id -> tile (local, sur chaque client)
+    Dictionary<int, SwitchSecret> _tilesById = new Dictionary<int, SwitchSecret>();
+
+    void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
     }
 
-    public StepResult StepOnTile(SwitchSecret tile)
+    void Start()
+    {
+        RebuildTileCache();
+    }
+
+    void RebuildTileCache()
+    {
+        _tilesById.Clear();
+        var tiles = FindObjectsOfType<SwitchSecret>(true);
+        foreach (var t in tiles)
+            _tilesById[t.id] = t;
+    }
+
+    // Appelé par SwitchSecret localement
+    public void StepOnTileLocal(SwitchSecret tile)
+    {
+        if (!IsSpawned) return;
+
+        // On envoie au serveur l'id de la dalle
+        RequestStepOnTileServerRpc(tile.id);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    void RequestStepOnTileServerRpc(int tileId)
+    {
+        var result = StepOnTileServer(tileId);
+
+        if (result == StepResult.Correct)
+            SetTileStateClientRpc(tileId, 1);
+        else if (result == StepResult.Wrong)
+            SetTileStateClientRpc(tileId, 2);
+    }
+
+    StepResult StepOnTileServer(int tileId)
     {
         if (_completed) return StepResult.Ignored;
         if (_isResetting) return StepResult.Ignored;
@@ -45,50 +75,84 @@ public class SecretPathManager : MonoBehaviour
 
         int expectedId = correctSequence[_progressIndex];
 
-        if (tile.id == expectedId)
+        if (tileId == expectedId)
         {
             _progressIndex++;
 
             if (_progressIndex >= correctSequence.Count)
-            {
                 OnSequenceCompleted();
-            }
 
             return StepResult.Correct;
         }
         else
         {
-            if (resetOnWrong) StartCoroutine(ResetAllTilesAfterDelay());
-            //TeleportToStartXR(); // si tu veux le garder
+            if (resetOnWrong)
+                StartCoroutine(ResetAllTilesAfterDelay());
+
             return StepResult.Wrong;
         }
     }
 
-    private void OnSequenceCompleted()
+    void OnSequenceCompleted()
     {
         _completed = true;
 
         if (doorToDestroy != null)
         {
-            Destroy(doorToDestroy, destroyDelay);
+            if (destroyDelay <= 0f) DisableDoorClientRpc();
+            else StartCoroutine(DisableDoorAfterDelay());
         }
 
         if (resetAfterSuccess)
-        {
             StartCoroutine(ResetAllTilesAfterDelay());
-        }
     }
 
-    private IEnumerator ResetAllTilesAfterDelay()
+    IEnumerator DisableDoorAfterDelay()
+    {
+        yield return new WaitForSeconds(destroyDelay);
+        DisableDoorClientRpc();
+    }
+
+    IEnumerator ResetAllTilesAfterDelay()
     {
         _isResetting = true;
         yield return new WaitForSeconds(resetDelay);
 
         _progressIndex = 0;
+        _completed = false;
 
-        var allTiles = FindObjectsOfType<SwitchSecret>();
-        foreach (var t in allTiles) t.ResetTile();
+        ResetAllTilesClientRpc();
 
         _isResetting = false;
+    }
+
+    // state: 0 neutral, 1 correct, 2 wrong
+    [ClientRpc]
+    void SetTileStateClientRpc(int tileId, int state)
+    {
+        if (_tilesById.Count == 0) RebuildTileCache();
+
+        if (!_tilesById.TryGetValue(tileId, out var tile) || tile == null)
+            return;
+
+        if (state == 1) tile.SetCorrect();
+        else if (state == 2) tile.SetWrong();
+        else tile.ResetTile();
+    }
+
+    [ClientRpc]
+    void ResetAllTilesClientRpc()
+    {
+        if (_tilesById.Count == 0) RebuildTileCache();
+
+        foreach (var kv in _tilesById)
+            if (kv.Value != null) kv.Value.ResetTile();
+    }
+
+    [ClientRpc]
+    void DisableDoorClientRpc()
+    {
+        if (doorToDestroy == null) return;
+        doorToDestroy.SetActive(false);
     }
 }

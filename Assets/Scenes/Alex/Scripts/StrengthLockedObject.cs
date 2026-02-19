@@ -1,18 +1,17 @@
 using System.Collections;
 using TMPro;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 
-public class StrengthLockedObject : MonoBehaviour
+public class StrengthLockedObject : NetworkBehaviour
 {
     [Header("Interaction")]
     public XRSimpleInteractable interactable;
 
     [Header("Behavior")]
     public bool disappear = true;
-    public Transform moveTarget;          // optionnel si disappear=false
-    public float moveDuration = 1.0f;
 
     [Header("SFX (optional)")]
     public AudioClip sfxBreak;
@@ -23,14 +22,8 @@ public class StrengthLockedObject : MonoBehaviour
     public TMP_Text messageText;
     public float msgDuration = 2f;
 
-    Vector3 _startPos;
-    Quaternion _startRot;
-
     void Awake()
     {
-        _startPos = transform.position;
-        _startRot = transform.rotation;
-
         if (interactable == null)
             interactable = GetComponent<XRSimpleInteractable>();
 
@@ -49,6 +42,7 @@ public class StrengthLockedObject : MonoBehaviour
 
     void OnSelected(SelectEnterEventArgs args)
     {
+        //  CHECK EN LOCAL (comme tu veux)
         int interactorId = args.interactorObject.transform.GetInstanceID();
 
         if (!PlayerStrengthState.IsStronger(interactorId))
@@ -57,37 +51,24 @@ public class StrengthLockedObject : MonoBehaviour
             return;
         }
 
-        if (disappear)
-        {
-            Show("Wow ! You broke the barrel !");
-            PlayBreakSfx();
-            gameObject.SetActive(false);
-        }
-        else
-        {
-            if (moveTarget != null)
-            {
-                Show("Wow ! You broke the barrel !");
-                PlayBreakSfx();
-                StopAllCoroutines();
-                StartCoroutine(MoveTo(moveTarget.position, moveTarget.rotation));
-            }
-        }
+        Show("Wow ! You broke the barrel !");
+        PlayBreakSfx();
+
+        //  demande au serveur de désactiver
+        RequestDisableServerRpc();
     }
 
-    IEnumerator MoveTo(Vector3 pos, Quaternion rot)
+    [ServerRpc(RequireOwnership = false)]
+    void RequestDisableServerRpc()
     {
-        Vector3 p0 = transform.position;
-        Quaternion r0 = transform.rotation;
+        // le serveur dit à tout le monde de désactiver
+        DisableObjectClientRpc();
+    }
 
-        float t = 0f;
-        while (t < 1f)
-        {
-            t += Time.deltaTime / Mathf.Max(0.01f, moveDuration);
-            transform.position = Vector3.Lerp(p0, pos, t);
-            transform.rotation = Quaternion.Slerp(r0, rot, t);
-            yield return null;
-        }
+    [ClientRpc]
+    void DisableObjectClientRpc()
+    {
+        gameObject.SetActive(false);
     }
 
     void PlayBreakSfx()

@@ -17,7 +17,7 @@ public class EndGame : MonoBehaviour
         // On charge la scène
         if (!string.IsNullOrEmpty(sceneName))
         {
-            SceneManager.LoadScene(sceneName);
+            Application.Quit();
         }
         else
         {

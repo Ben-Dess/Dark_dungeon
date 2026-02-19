@@ -1,21 +1,49 @@
+using System;
 using System.Collections.Generic;
 using System.Text;
 using TMPro;
+using Unity.Netcode;
 using UnityEngine;
 
-public class PotionRecipeManager : MonoBehaviour
+using System; // <-- ajoute ça en haut du fichier
+
+public class PotionRecipeManager : NetworkBehaviour
 {
     [System.Serializable]
     public struct RecipeEntry
     {
         public int shelfID;
-        public string colorName; // "Red", "Orange", ...
+        public string colorName;
     }
+
+
+public struct RecipeEntryNet : INetworkSerializable, IEquatable<RecipeEntryNet>
+{
+    public int shelfID;
+    public int colorIndex;
+
+    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+    {
+        serializer.SerializeValue(ref shelfID);
+        serializer.SerializeValue(ref colorIndex);
+    }
+
+    public bool Equals(RecipeEntryNet other)
+        => shelfID == other.shelfID && colorIndex == other.colorIndex;
+
+    public override bool Equals(object obj)
+        => obj is RecipeEntryNet other && Equals(other);
+
+    public override int GetHashCode()
+        => HashCode.Combine(shelfID, colorIndex);
+}
+
+
+    private NetworkList<RecipeEntryNet> networkRecipe = new();
 
     [Header("Pools")]
     public List<int> availableShelves = new() { 1, 2, 3, 4, 5, 6, 7 };
 
-    // Noms utilisés sur tes bouteilles (EN)
     public List<string> availableColors = new()
     {
         "Red", "Orange", "Green", "Blue", "Yellow", "Black", "Grey", "Purple"
@@ -27,61 +55,93 @@ public class PotionRecipeManager : MonoBehaviour
     [Header("Recipe")]
     public int recipeCount = 3;
 
+    // ON GARDE EXACTEMENT CE NOM
     public List<RecipeEntry> CurrentRecipe { get; private set; } = new();
 
-    void Start()
+    void Awake()
     {
-        GenerateRecipe(recipeCount);
-        UpdateBoard();
-
-        // Log de la recette (ordre important)
-        Debug.Log("[Recipe] " + RecipeToString());
+        networkRecipe.OnListChanged += _ =>
+        {
+            RebuildLocalRecipeFromNetwork();
+            UpdateBoard();
+        };
     }
 
+    public override void OnNetworkSpawn()
+    {
+        if (IsServer)
+        {
+            GenerateRecipe(recipeCount);
+        }
+        else
+        {
+            RebuildLocalRecipeFromNetwork();
+            UpdateBoard();
+        }
+    }
+
+    // ==============================
+    // SERVER GENERATION
+    // ==============================
     public void GenerateRecipe(int count)
     {
+        if (!IsServer) return;
+
+        networkRecipe.Clear();
         CurrentRecipe.Clear();
 
         if (availableShelves == null || availableShelves.Count == 0) return;
         if (availableColors == null || availableColors.Count == 0) return;
 
-        // On empêche les doublons: même couple shelfID + color
         var used = new HashSet<string>();
 
-        // Safety pour éviter boucle infinie si pool trop petit
         int safety = 0;
         int maxCombos = availableShelves.Count * availableColors.Count;
         int target = Mathf.Min(count, maxCombos);
 
-        while (CurrentRecipe.Count < target && safety < 500)
+        while (networkRecipe.Count < target && safety < 500)
         {
             safety++;
 
-            int shelf = availableShelves[Random.Range(0, availableShelves.Count)];
-            string color = availableColors[Random.Range(0, availableColors.Count)];
+            int shelf = availableShelves[UnityEngine.Random.Range(0, availableShelves.Count)];
+            int colorIndex = UnityEngine.Random.Range(0, availableColors.Count);
 
-            // Normalisation (minuscule / trim / accents)
-            string key = $"{shelf}:{Normalize(color)}";
-
+            string key = $"{shelf}:{colorIndex}";
             if (used.Contains(key))
                 continue;
 
             used.Add(key);
 
-            CurrentRecipe.Add(new RecipeEntry
+            networkRecipe.Add(new RecipeEntryNet
             {
                 shelfID = shelf,
-                colorName = color
+                colorIndex = colorIndex
             });
         }
 
-        if (CurrentRecipe.Count < count)
+        Debug.Log("[Recipe] " + RecipeToString());
+    }
+
+    // ==============================
+    // CLIENT REBUILD
+    // ==============================
+    void RebuildLocalRecipeFromNetwork()
+    {
+        CurrentRecipe.Clear();
+
+        foreach (var entry in networkRecipe)
         {
-            Debug.LogWarning($"[PotionRecipeManager] Pool trop petit pour {count} entrées uniques. " +
-                             $"Généré: {CurrentRecipe.Count}/{count} (combos max={maxCombos}).");
+            CurrentRecipe.Add(new RecipeEntry
+            {
+                shelfID = entry.shelfID,
+                colorName = availableColors[entry.colorIndex]
+            });
         }
     }
 
+    // ==============================
+    // UI
+    // ==============================
     void UpdateBoard()
     {
         if (boardText == null) return;
@@ -97,22 +157,20 @@ public class PotionRecipeManager : MonoBehaviour
             Color c = ColorFromName(entry.colorName);
             string hex = ColorUtility.ToHtmlStringRGB(c);
 
-            // Affiche uniquement le numéro d'étagère coloré
             boardText.text += $"<size=160%><b><color=#{hex}>{entry.shelfID}</color></b></size>";
 
-            // Séparateur visuel (tu peux remplacer par + si tu veux)
             if (i < CurrentRecipe.Count - 1)
-                boardText.text += "  <size=50%><b> </b></size>  ";
+                boardText.text += "  ";
         }
 
         boardText.ForceMeshUpdate();
     }
 
-    // ====== LOG UTILS ======
-
+    // ==============================
+    // DEBUG
+    // ==============================
     public string RecipeToString()
     {
-        // Exemple: 1) 6-Red | 2) 1-Blue | 3) 4-Grey
         var sb = new StringBuilder();
         for (int i = 0; i < CurrentRecipe.Count; i++)
         {
@@ -122,26 +180,17 @@ public class PotionRecipeManager : MonoBehaviour
         return sb.ToString();
     }
 
-    // ----- Couleurs robustes -----
-
+    // ==============================
+    // COLORS (inchangé)
+    // ==============================
     Color ColorFromName(string name)
     {
-        string n = Normalize(name);
+        string n = name.ToLowerInvariant();
 
         switch (n)
         {
-            // FR
-            case "rouge": return Color.red;
-            case "orange": return new Color(1f, 0.5f, 0f);
-            case "vert": return Color.green;
-            case "bleu": return Color.blue;
-            case "jaune": return Color.yellow;
-            case "noir": return Color.black;
-            case "gris": return Color.gray;
-            case "violet": return new Color(0.6f, 0f, 0.8f);
-
-            // EN
             case "red": return Color.red;
+            case "orange": return new Color(1f, 0.5f, 0f);
             case "green": return Color.green;
             case "blue": return Color.blue;
             case "yellow": return Color.yellow;
@@ -151,37 +200,6 @@ public class PotionRecipeManager : MonoBehaviour
             case "purple": return new Color(0.6f, 0f, 0.8f);
         }
 
-        Debug.LogWarning($"[PotionRecipeManager] Couleur inconnue: '{name}' (normalisée: '{n}'). Retourne blanc.");
         return Color.white;
-    }
-
-    string Normalize(string s)
-    {
-        if (string.IsNullOrWhiteSpace(s)) return "";
-        s = s.Trim().ToLowerInvariant();
-
-        // enlever accents (é -> e)
-        string formD = s.Normalize(NormalizationForm.FormD);
-        var sb = new StringBuilder();
-        foreach (char ch in formD)
-        {
-            var uc = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(ch);
-            if (uc != System.Globalization.UnicodeCategory.NonSpacingMark)
-                sb.Append(ch);
-        }
-        s = sb.ToString().Normalize(NormalizationForm.FormC);
-
-        return s;
-    }
-
-    // Option debug
-    string DebugRecipeLine()
-    {
-        var sb = new StringBuilder("Recipe raw: ");
-        for (int i = 0; i < CurrentRecipe.Count; i++)
-        {
-            sb.Append($"[{CurrentRecipe[i].shelfID}:{CurrentRecipe[i].colorName}] ");
-        }
-        return sb.ToString();
     }
 }

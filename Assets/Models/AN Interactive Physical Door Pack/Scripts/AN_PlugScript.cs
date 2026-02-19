@@ -1,98 +1,85 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using Unity.Netcode;
 
-public class AN_PlugScript : MonoBehaviour
+[RequireComponent(typeof(NetworkObject))]
+public class AN_PlugScript : NetworkBehaviour
 {
     [Tooltip("Feature for one using only")]
     public bool OneTime = false;
-    [Tooltip("Plug follow this local EmptyObject")]
-    public Transform HeroHandsPosition;
-    [Tooltip("SocketObject with collider(shpere, box etc.) (is trigger = true)")]
-    public Collider Socket; // need Trigger
+
+    [Tooltip("SocketObject with collider (isTrigger = true)")]
+    public Collider Socket;
+
+    [Tooltip("Door controlled by the socket (NETWORK VERSION)")]
     public AN_DoorScript DoorObject;
 
-    // NearView()
-    float distance;
-    float angleView;
-    Vector3 direction;
+    [Header("Optional local follow (VR/Hands)")]
+    public Transform HeroHandsPosition; // only for local visuals if you keep follow
 
-    bool follow = false, isConnected = false, followFlag = false, youCan = true;
+    private NetworkVariable<bool> Connected = new(false);
+
     Rigidbody rb;
+    bool youCan = true;
 
-    void Start()
+    void Awake()
     {
         rb = GetComponent<Rigidbody>();
     }
 
-    void Update()
+    public override void OnNetworkSpawn()
     {
-        if (youCan) Interaction();
-
-        // frozen if it is connected to PowerOut
-        if (isConnected)
-        {
-            gameObject.transform.position = Socket.transform.position;
-            gameObject.transform.rotation = Socket.transform.rotation;
-            DoorObject.isOpened = true;
-        }
-        else
-        {
-            DoorObject.isOpened = false;
-        }
+        Connected.OnValueChanged += (_, __) => ApplySnap();
+        ApplySnap();
     }
 
-    void Interaction()
+    void OnDestroy()
     {
-        if (NearView() && Input.GetKeyDown(KeyCode.E) && !follow)
-        {
-            isConnected = false; // unfrozen
-            follow = true;
-            followFlag = false;
-        }
-
-        if (follow)
-        {
-            rb.linearDamping = 10f;
-            rb.angularDamping = 10f;
-            if (followFlag)
-            {
-                distance = Vector3.Distance(transform.position, Camera.main.transform.position);
-                if (distance > 3f || Input.GetKeyDown(KeyCode.E))
-                {
-                    follow = false;
-                }
-            }
-
-            followFlag = true;
-            rb.AddExplosionForce(-1000f, HeroHandsPosition.position, 10f);
-            // second variant of following
-            //gameObject.transform.position = Vector3.Lerp(gameObject.transform.position, objectLerp.position, 1f);
-        }
-        else
-        {
-            rb.linearDamping = 0f;
-            rb.angularDamping = .5f;
-        }
+        Connected.OnValueChanged -= (_, __) => ApplySnap();
     }
 
-    bool NearView() // it is true if you near interactive object
+    void ApplySnap()
     {
-        distance = Vector3.Distance(transform.position, Camera.main.transform.position);
-        direction = transform.position - Camera.main.transform.position;
-        angleView = Vector3.Angle(Camera.main.transform.forward, direction);
-        if (distance < 3f && angleView <35f) return true;
-        else return false;
+        if (!Connected.Value) return;
+        if (Socket == null) return;
+
+        // Snap to socket on everyone
+        transform.position = Socket.transform.position;
+        transform.rotation = Socket.transform.rotation;
+
+        // Freeze physics when connected
+        if (rb != null)
+        {
+            rb.isKinematic = true;
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other == Socket)
+        // Only server decides connection (authoritative)
+        if (!IsServer) return;
+        if (!youCan) return;
+
+        if (other == Socket && !Connected.Value)
         {
-            isConnected = true;
-            follow = false;
-            DoorObject.rbDoor.AddRelativeTorque(new Vector3(0, 0, 20f));
+            Connected.Value = true;
+
+            // Unlock door for everyone (persistent)
+            if (DoorObject != null)
+            {
+                DoorObject.RequestUnlock();
+
+                // Optionnel : ouvrir direct quand on branche
+                // DoorObject.RequestOpen();
+            }
+
+            if (OneTime) youCan = false;
         }
-        if (OneTime) youCan = false;
     }
+
+    // ---------- OPTIONAL ----------
+    // If you want "take plug" in VR, don’t use E/Camera.main in multiplayer.
+    // Call these from XR events on the LOCAL player and send ServerRpc to request ownership/move.
+    // For now, simplest is: only server moves it or use NetworkTransform ownership.
 }

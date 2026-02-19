@@ -4,7 +4,7 @@ using UnityEngine.SceneManagement;
 
 public class NetworkLoadScene : NetworkBehaviour
 {
-    [SerializeField] private string sceneName = "Salle2_Clean";
+    public string sceneName;
 
     private void OnTriggerEnter(Collider other)
     {

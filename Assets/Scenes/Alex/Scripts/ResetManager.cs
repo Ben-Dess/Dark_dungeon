@@ -123,7 +123,7 @@ public class ResetManager : MonoBehaviour
                 st.rb.isKinematic = false;
                 st.rb.useGravity = true;
 
-                st.rb.velocity = Vector3.zero;
+                st.rb.linearVelocity = Vector3.zero;
 
                 st.rb.angularVelocity = Vector3.zero;
 

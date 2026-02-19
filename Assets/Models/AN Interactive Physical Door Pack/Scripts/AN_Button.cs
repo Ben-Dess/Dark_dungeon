@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
+using Unity.Netcode;
 
-public class AN_Button : MonoBehaviour
+[RequireComponent(typeof(NetworkObject))]
+public class AN_Button : NetworkBehaviour
 {
     [Tooltip("True for rotation like valve (used for ramp/elevator only)")]
     public bool isValve = false;
@@ -14,7 +16,7 @@ public class AN_Button : MonoBehaviour
     [Tooltip("If it is false button/lever can't be used")]
     public bool Locked = false;
 
-    [Tooltip("The door for remote control")]
+    [Tooltip("The door for remote control (NETWORK VERSION)")]
     public AN_DoorScript DoorObject;
 
     [Space]
@@ -27,7 +29,7 @@ public class AN_Button : MonoBehaviour
     [Tooltip("Door can be closed")]
     public bool CanClose = true;
 
-    [Tooltip("Current status of the door")]
+    [Tooltip("Current status of the valve target")]
     public bool isOpened = false;
 
     [Space]
@@ -39,17 +41,9 @@ public class AN_Button : MonoBehaviour
 
     public float max = 90f, min = 0f, speed = 5f;
 
-    // -------------------------
-    // VR Animation config
-    // -------------------------
     [Header("VR Animation (optional)")]
-    [Tooltip("Animator to play lever/button animation. If empty, uses Animator on same GameObject.")]
     public Animator leverAnimator;
-
-    [Tooltip("Bool parameter name for lever hold state (your controller shows: LeverUp).")]
     public string leverHoldBoolName = "LeverUp";
-
-    [Tooltip("Trigger parameter name for button press (your controller shows: ButtonPre).")]
     public string buttonPressTriggerName = "ButtonPre";
 
     // Valve internals
@@ -57,19 +51,15 @@ public class AN_Button : MonoBehaviour
     float current, startYPosition;
     Quaternion startQuat, rampQuat;
 
-    Animator anim;
-
-    // VR hold state (replaces old Input.GetKey)
+    // VR hold state
     bool _isHeld = false;
 
     void Start()
     {
-        anim = GetComponent<Animator>();
-        if (leverAnimator == null) leverAnimator = anim;
+        if (leverAnimator == null) leverAnimator = GetComponent<Animator>();
 
         startQuat = transform.rotation;
 
-        // Fix: RampObject can be null
         if (RampObject != null)
         {
             startYPosition = RampObject.position.y;
@@ -81,13 +71,12 @@ public class AN_Button : MonoBehaviour
     {
         if (Locked) return;
 
-        // VR: no UnityEngine.Input here.
-        // - Lever/Button uses BeginHold/EndHold (called by XR events)
-        // - Valve continues to update while _isHeld is true
+        // Valve simulation: choose authority
+        // Option A (simple): server drives valve for everyone
+        if (!IsServer) return;
 
         if (isValve && RampObject != null)
         {
-            // Changing value in script
             if (_isHeld)
             {
                 if (valveBool)
@@ -95,27 +84,18 @@ public class AN_Button : MonoBehaviour
                     if (!isOpened && CanOpen && current < max) current += speed * Time.deltaTime;
                     if (isOpened && CanClose && current > min) current -= speed * Time.deltaTime;
 
-                    if (current >= max)
-                    {
-                        isOpened = true;
-                        valveBool = false;
-                    }
-                    else if (current <= min)
-                    {
-                        isOpened = false;
-                        valveBool = false;
-                    }
+                    if (current >= max) { isOpened = true; valveBool = false; }
+                    else if (current <= min) { isOpened = false; valveBool = false; }
                 }
             }
             else
             {
-                // Return / relax behaviour when not held
                 if (!isOpened && current > min) current -= speed * Time.deltaTime;
                 if (isOpened && current < max) current += speed * Time.deltaTime;
                 valveBool = true;
             }
 
-            // Apply values to objects
+            // Apply visuals on server (clients will see transform via NetworkTransform if you add it)
             transform.rotation = startQuat * Quaternion.Euler(0f, 0f, current * ValveSpeed);
 
             if (xRotation)
@@ -129,60 +109,40 @@ public class AN_Button : MonoBehaviour
     // ===== VR ENTRY POINTS ===
     // =========================
 
-    /// <summary>
-    /// Called when player STARTS holding Select on XR Simple Interactable.
-    /// - Lever: sets LeverUp = true, opens door
-    /// - Button: triggers ButtonPre, opens door
-    /// - Valve: starts rotation while held
-    /// </summary>
     public void BeginHold()
     {
         if (Locked) return;
         _isHeld = true;
 
-        // Animation feedback
+        // Local animation feedback instantly
         if (leverAnimator != null)
         {
-            if (isLever)
-            {
-                // Your animator uses a Bool named "LeverUp"
-                leverAnimator.SetBool(leverHoldBoolName, true);
-            }
-            else
-            {
-                // Your animator uses a Trigger named "ButtonPre"
-                leverAnimator.SetTrigger(buttonPressTriggerName);
-            }
+            if (isLever) leverAnimator.SetBool(leverHoldBoolName, true);
+            else leverAnimator.SetTrigger(buttonPressTriggerName);
         }
 
-        // Door control (hold-to-open)
-        if (!isValve && DoorObject != null && DoorObject.Remote)
+        // IMPORTANT CHANGE:
+        // Instead of "hold-to-open", we UNLOCK for everyone (persistent).
+        if (!isValve && DoorObject != null)
         {
-            DoorObject.SetOpen(true);
+            DoorObject.RequestUnlock();
         }
+
+        // If you want the lever press to also OPEN immediately, uncomment:
+        // if (!isValve && DoorObject != null) DoorObject.RequestOpen();
     }
 
-    /// <summary>
-    /// Called when player STOPS holding Select.
-    /// - Lever: sets LeverUp = false, closes door
-    /// - Button: (no trigger on release), closes door
-    /// - Valve: stops rotation (Update handles relax)
-    /// </summary>
     public void EndHold()
     {
         if (Locked) return;
         _isHeld = false;
 
-        // Animation feedback
+        // Lever animation release only (NO closing door anymore)
         if (leverAnimator != null && isLever)
         {
             leverAnimator.SetBool(leverHoldBoolName, false);
         }
 
-        // Door control (release-to-close)
-        if (!isValve && DoorObject != null && DoorObject.Remote)
-        {
-            DoorObject.SetOpen(false);
-        }
+        // Do NOT call SetOpen(false) here.
     }
 }
