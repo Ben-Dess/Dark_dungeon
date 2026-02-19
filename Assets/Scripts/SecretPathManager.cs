@@ -1,6 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.XR.Interaction.Toolkit;
+using Unity.XR.CoreUtils;
+
 
 public class SecretPathManager : MonoBehaviour
 {
@@ -8,15 +11,17 @@ public class SecretPathManager : MonoBehaviour
 
     public enum StepResult { Correct, Wrong, Ignored }
 
-    [Header("Séquence correcte (IDs des dalles dans l'ordre)")]
+    [Header("Séquence correcte")]
     public List<int> correctSequence = new List<int>();
 
     [Header("Reset")]
-    public float resetDelay = 1.0f;
+    public float resetDelay = 1f;
     public bool resetOnWrong = true;
 
-    [Header("Optionnel: action quand la séquence est complétée")]
-    public GameObject secretDoorToOpen;
+    [Header("XR Teleport")]
+    public XROrigin xrOrigin;       // ton XR Origin (XR Rig)
+    public Transform startPoint;    // ton StartPoint
+    public bool matchRotation = true;
 
     private int _progressIndex = 0;
     private bool _isResetting = false;
@@ -37,32 +42,37 @@ public class SecretPathManager : MonoBehaviour
         if (tile.id == expectedId)
         {
             _progressIndex++;
-
-            // séquence terminée
-            if (_progressIndex >= correctSequence.Count)
-            {
-                OnSequenceCompleted();
-            }
-
             return StepResult.Correct;
         }
         else
         {
-            if (resetOnWrong)
-                StartCoroutine(ResetAllTilesAfterDelay());
-
+            if (resetOnWrong) StartCoroutine(ResetAllTilesAfterDelay());
+            TeleportToStartXR();
             return StepResult.Wrong;
         }
     }
 
-    private void OnSequenceCompleted()
+    private void TeleportToStartXR()
     {
-        // exemple simple : ouvrir une porte / activer un passage
-        if (secretDoorToOpen != null)
-            secretDoorToOpen.SetActive(false);
+        if (xrOrigin == null || startPoint == null) return;
 
-        // si tu veux empêcher de recommencer
-        // _isResetting = true;
+        // 1) Position: place la CAMERA exactement sur startPoint
+        xrOrigin.MoveCameraToWorldLocation(startPoint.position);
+
+        // 2) Rotation (yaw uniquement)
+        if (matchRotation && xrOrigin.Camera != null)
+        {
+            float currentYaw = xrOrigin.Camera.transform.eulerAngles.y;
+            float targetYaw = startPoint.eulerAngles.y;
+            float deltaYaw = targetYaw - currentYaw;
+
+            // Tourne l'origin autour de la caméra (évite les offsets chelous)
+            xrOrigin.Origin.transform.RotateAround(
+                xrOrigin.Camera.transform.position,
+                Vector3.up,
+                deltaYaw
+            );
+        }
     }
 
     private IEnumerator ResetAllTilesAfterDelay()
@@ -72,10 +82,8 @@ public class SecretPathManager : MonoBehaviour
 
         _progressIndex = 0;
 
-        // reset toutes les dalles de la scène
         var allTiles = FindObjectsOfType<SwitchSecret>();
-        foreach (var t in allTiles)
-            t.ResetTile();
+        foreach (var t in allTiles) t.ResetTile();
 
         _isResetting = false;
     }
