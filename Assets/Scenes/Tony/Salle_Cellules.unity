@@ -3786,7 +3786,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8038359593220995519, guid: 62676ba4a65d36d4d8cb012fd1315648, type: 3}
       propertyPath: m_Constraints
-      value: 4
+      value: 118
       objectReference: {fileID: 0}
     - target: {fileID: 8038359593220995519, guid: 62676ba4a65d36d4d8cb012fd1315648, type: 3}
       propertyPath: m_IsKinematic
@@ -9319,6 +9319,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2457273537969178838, guid: fbac80f280a03844bbdc56acff09ba24, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1170481547}
+    - targetCorrespondingSourceObject: {fileID: 2457273537969178838, guid: fbac80f280a03844bbdc56acff09ba24, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1170481548}
   m_SourcePrefab: {fileID: 100100000, guid: fbac80f280a03844bbdc56acff09ba24, type: 3}
 --- !u!4 &1170481540 stripped
 Transform:
@@ -9552,6 +9555,19 @@ MonoBehaviour:
   SwitchTransformSpaceWhenParented: 0
   Interpolate: 1
   SlerpPosition: 0
+--- !u!114 &1170481548
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 424958284}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2b43853b9d8f5e41b888b0a6188297d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GrabOwnership
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!1001 &1175614976
 PrefabInstance:
   m_ObjectHideFlags: 0

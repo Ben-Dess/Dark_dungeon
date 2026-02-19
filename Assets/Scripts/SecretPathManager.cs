@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 using Unity.XR.CoreUtils;
 
-
 public class SecretPathManager : MonoBehaviour
 {
     public static SecretPathManager Instance { get; private set; }
@@ -19,12 +18,18 @@ public class SecretPathManager : MonoBehaviour
     public bool resetOnWrong = true;
 
     [Header("XR Teleport")]
-    public XROrigin xrOrigin;       // ton XR Origin (XR Rig)
-    public Transform startPoint;    // ton StartPoint
+    public XROrigin xrOrigin;
+    public Transform startPoint;
     public bool matchRotation = true;
+
+    [Header("Fin de séquence")]
+    public GameObject doorToDestroy;     // glisse ta porte ici dans l’inspecteur
+    public float destroyDelay = 0f;      // 0 = immédiat
+    public bool resetAfterSuccess = false;
 
     private int _progressIndex = 0;
     private bool _isResetting = false;
+    private bool _completed = false;
 
     private void Awake()
     {
@@ -34,6 +39,7 @@ public class SecretPathManager : MonoBehaviour
 
     public StepResult StepOnTile(SwitchSecret tile)
     {
+        if (_completed) return StepResult.Ignored;
         if (_isResetting) return StepResult.Ignored;
         if (correctSequence == null || correctSequence.Count == 0) return StepResult.Ignored;
 
@@ -42,36 +48,34 @@ public class SecretPathManager : MonoBehaviour
         if (tile.id == expectedId)
         {
             _progressIndex++;
+
+            if (_progressIndex >= correctSequence.Count)
+            {
+                OnSequenceCompleted();
+            }
+
             return StepResult.Correct;
         }
         else
         {
             if (resetOnWrong) StartCoroutine(ResetAllTilesAfterDelay());
-            TeleportToStartXR();
+            //TeleportToStartXR(); // si tu veux le garder
             return StepResult.Wrong;
         }
     }
 
-    private void TeleportToStartXR()
+    private void OnSequenceCompleted()
     {
-        if (xrOrigin == null || startPoint == null) return;
+        _completed = true;
 
-        // 1) Position: place la CAMERA exactement sur startPoint
-        xrOrigin.MoveCameraToWorldLocation(startPoint.position);
-
-        // 2) Rotation (yaw uniquement)
-        if (matchRotation && xrOrigin.Camera != null)
+        if (doorToDestroy != null)
         {
-            float currentYaw = xrOrigin.Camera.transform.eulerAngles.y;
-            float targetYaw = startPoint.eulerAngles.y;
-            float deltaYaw = targetYaw - currentYaw;
+            Destroy(doorToDestroy, destroyDelay);
+        }
 
-            // Tourne l'origin autour de la caméra (évite les offsets chelous)
-            xrOrigin.Origin.transform.RotateAround(
-                xrOrigin.Camera.transform.position,
-                Vector3.up,
-                deltaYaw
-            );
+        if (resetAfterSuccess)
+        {
+            StartCoroutine(ResetAllTilesAfterDelay());
         }
     }
 
