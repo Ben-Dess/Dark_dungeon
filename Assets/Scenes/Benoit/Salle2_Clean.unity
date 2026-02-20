@@ -10394,6 +10394,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: VR CONTROL
       objectReference: {fileID: 0}
+    - target: {fileID: 2261657278518040876, guid: b649679bd65415541b75f10cae93add2, type: 3}
+      propertyPath: m_CameraYOffset
+      value: 1.8
+      objectReference: {fileID: 0}
     - target: {fileID: 8170396272800764483, guid: b649679bd65415541b75f10cae93add2, type: 3}
       propertyPath: m_LocalPosition.x
       value: 8.35543
@@ -11046,15 +11050,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2945372586575957477, guid: 698a79f56c038f540b86b9a052ae90eb, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.431
+      value: 6.057
       objectReference: {fileID: 0}
     - target: {fileID: 2945372586575957477, guid: 698a79f56c038f540b86b9a052ae90eb, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.581
+      value: 0.658
       objectReference: {fileID: 0}
     - target: {fileID: 2945372586575957477, guid: 698a79f56c038f540b86b9a052ae90eb, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 2.852
+      value: 0.792
       objectReference: {fileID: 0}
     - target: {fileID: 2945372586575957477, guid: 698a79f56c038f540b86b9a052ae90eb, type: 3}
       propertyPath: m_LocalRotation.w

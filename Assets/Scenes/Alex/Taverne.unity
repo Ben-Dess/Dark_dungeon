@@ -14419,6 +14419,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: VR CONTROL
       objectReference: {fileID: 0}
+    - target: {fileID: 2261657278518040876, guid: b649679bd65415541b75f10cae93add2, type: 3}
+      propertyPath: m_CameraYOffset
+      value: 1.8
+      objectReference: {fileID: 0}
     - target: {fileID: 8170396272800764483, guid: b649679bd65415541b75f10cae93add2, type: 3}
       propertyPath: m_LocalPosition.x
       value: 5.124896

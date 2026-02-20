@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/Menus/StarterMenu.unity
+    guid: 65ecf05869a4f7749a88e797ab1e8a05
+  - enabled: 1
     path: Assets/Scenes/Menus/MultiConnectMenu.unity
     guid: 937dab4c706450442a8d315e8d7958cc
   - enabled: 1
@@ -23,9 +26,6 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Tony/FinalScene.unity
     guid: d1952a73d8bfe514d94731fb4c773215
-  - enabled: 1
-    path: Assets/Scenes/Menus/StarterMenu.unity
-    guid: 65ecf05869a4f7749a88e797ab1e8a05
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: bfa1182bd221b4ca89619141f66f1260, type: 2}
     Unity.XR.WindowsMR.Settings: {fileID: 11400000, guid: dc5a169419fa04987b057f65238cf3ba, type: 2}
